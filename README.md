@@ -14,3 +14,17 @@ a python tool to find admin panel
 <code>$ cd AdminFinder</code>
 <br>
 <code>$ python3 AdminFinder.py</code>
+<h1>Preview</h1>
+<pre>
+    _       _           _       _____ _           _           
+   / \   __| |_ __ ___ (_)_ __ |  ___(_)_ __   __| | ___ _ __ 
+  / _ \ / _` | '_ ` _ \| | '_ \| |_  | | '_ \ / _` |/ _ \ '__|
+ / ___ \ (_| | | | | | | | | | |  _| | | | | | (_| |  __/ |   
+/_/   \_\__,_|_| |_| |_|_|_| |_|_|   |_|_| |_|\__,_|\___|_|   
+                                                              
+       github.com/e811-py          t.me/Mr3rf1             
+       
+ [<] Enter Url~> google.com
+ [<] Enter Workers~> 300
+
+</pre>
