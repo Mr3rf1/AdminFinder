@@ -5,31 +5,31 @@ from threading import Thread
 from colorama import Fore
 from time import time
 
-res = []
+found_panels = []
 
-def reqer(url, path):
-    if not url.endswith('/'):
-        url += '/'
-    url += path
+def check_admin_panel(base_url, admin_path):
+    if not base_url.endswith('/'):
+        base_url += '/'
+    full_url = base_url + admin_path
     try:
         with httpx.Client() as client:
-            r = client.get(url)
-            if r.status_code == 200:
-                print(f' {Fore.YELLOW}[{Fore.RED}*{Fore.YELLOW}]{Fore.GREEN} Panel found ~> {Fore.RESET}{url}')
-                res.append(url)
+            response = client.get(full_url)
+            if response.status_code == 200:
+                print(f' {Fore.YELLOW}[{Fore.RED}*{Fore.YELLOW}]{Fore.GREEN} Panel found ~> {Fore.RESET}{full_url}')
+                found_panels.append(full_url)
             else:
-                print(f' {Fore.YELLOW}[{Fore.RED}!{Fore.YELLOW}]{Fore.RED} Panel not found ~> {url}')
+                print(f' {Fore.YELLOW}[{Fore.RED}!{Fore.YELLOW}]{Fore.RED} Panel not found ~> {full_url}')
     except Exception:
-        print(f' {Fore.YELLOW}[{Fore.RED}!{Fore.YELLOW}]{Fore.RED} Panel not found ~> {url}')
+        print(f' {Fore.YELLOW}[{Fore.RED}!{Fore.YELLOW}]{Fore.RED} Panel not found ~> {full_url}')
 
-def worker(q, url):
+def worker_thread(task_queue, target_url):
     while True:
-        pth = q.get()
-        reqer(url, pth)
-        q.task_done()
+        admin_path = task_queue.get()
+        check_admin_panel(target_url, admin_path)
+        task_queue.task_done()
 
 def main():
-    q = Queue()
+    task_queue = Queue()
     print('''    _       _           _       _____ _           _           
    / \   __| |_ __ ___ (_)_ __ |  ___(_)_ __   __| | ___ _ __ 
   / _ \ / _` | '_ ` _ \| | '_ \| |_  | | '_ \ / _` |/ _ \ '__|
@@ -38,17 +38,17 @@ def main():
                                                               
        github.com/e811-py          t.me/Mr3rf1             
        ''')
-    url = input(f' {Fore.YELLOW}[{Fore.CYAN}<{Fore.YELLOW}]{Fore.RESET} Enter Url~> {Fore.LIGHTGREEN_EX}')
-    Worker = input(f' {Fore.YELLOW}[{Fore.CYAN}<{Fore.YELLOW}]{Fore.RESET} Enter Workers~> {Fore.LIGHTGREEN_EX}')
-    if not url.startswith('http://') and not url.startswith('https://'):
-           url = f'http://{url}'
+    target_url = input(f' {Fore.YELLOW}[{Fore.CYAN}<{Fore.YELLOW}]{Fore.RESET} Enter Url~> {Fore.LIGHTGREEN_EX}')
+    worker_count = input(f' {Fore.YELLOW}[{Fore.CYAN}<{Fore.YELLOW}]{Fore.RESET} Enter Workers~> {Fore.LIGHTGREEN_EX}')
+    if not target_url.startswith('http://') and not target_url.startswith('https://'):
+           target_url = f'http://{target_url}'
     while True:
        try:
-              Worker = int(Worker)
+              worker_count = int(worker_count)
               break
        except:
-              Worker = input(f' {Fore.YELLOW}[{Fore.RED}!{Fore.YELLOW}]{Fore.RESET} Please Enter a number~> {Fore.LIGHTGREEN_EX}')
-    lis = ['admin/', 'administrator/', 'login.php', 'administration/', 'admin1/', 'admin2/', 'admin3/', 'admin4/',
+              worker_count = input(f' {Fore.YELLOW}[{Fore.RED}!{Fore.YELLOW}]{Fore.RESET} Please Enter a number~> {Fore.LIGHTGREEN_EX}')
+    admin_paths = ['admin/', 'administrator/', 'login.php', 'administration/', 'admin1/', 'admin2/', 'admin3/', 'admin4/',
            'admin5/', 'moderator/', 'webadmin/', 'adminarea/', 'bb-admin/', 'adminLogin/', 'admin_area/',
            'panel-administracion/', 'instadmin/',
            'memberadmin/', 'administratorlogin/', 'adm/', 'account.asp', 'admin/account.asp', 'admin/index.asp',
@@ -291,19 +291,19 @@ def main():
            'admin2/login.brf', 'admin2/index.brf', 'usuarios/login.brf',
            'adm/index.brf', 'adm.brf', 'affiliate.brf', 'adm_auth.brf', 'memberadmin.brf', 'administratorlogin.brf',
            'cpanel', 'cpanel.php', 'cpanel.html', ]
-    stime = time()
-    for _ in range(Worker):
-        t = Thread(target=worker, args=(q, url))
-        t.daemon = True
-        t.start()
-    for l in lis:
-        q.put(l)
-    q.join()
-    if res != []:
-        print(f'\n  {Fore.YELLOW}[{Fore.GREEN}*{Fore.YELLOW}]{Fore.GREEN} Panel Found: (in {int(time()-stime)} seconds)')
-        for r in res:
-            print(f'        {Fore.RESET}{r}')
-    elif res == []:
+    start_time = time()
+    for _ in range(worker_count):
+        thread = Thread(target=worker_thread, args=(task_queue, target_url))
+        thread.daemon = True
+        thread.start()
+    for admin_path in admin_paths:
+        task_queue.put(admin_path)
+    task_queue.join()
+    if found_panels != []:
+        print(f'\n  {Fore.YELLOW}[{Fore.GREEN}*{Fore.YELLOW}]{Fore.GREEN} Panel Found: (in {int(time()-start_time)} seconds)')
+        for panel_url in found_panels:
+            print(f'        {Fore.RESET}{panel_url}')
+    elif found_panels == []:
         print(f'\n   {Fore.YELLOW}[{Fore.RED}!{Fore.YELLOW}]{Fore.RED} Panel not found :(')
 
 if __name__ == '__main__':
