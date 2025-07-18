@@ -1,5 +1,5 @@
 #t.me/Mr3rf1 :)
-from requests import get
+import httpx
 from queue import Queue
 from threading import Thread
 from colorama import Fore
@@ -11,11 +11,15 @@ def reqer(url, path):
     if not url.endswith('/'):
         url += '/'
     url += path
-    r = get(url)
-    if r.status_code == 200:
-        print(f' {Fore.YELLOW}[{Fore.RED}*{Fore.YELLOW}]{Fore.GREEN} Panel found ~> {Fore.RESET}{url}')
-        res.append(url)
-    else:
+    try:
+        with httpx.Client() as client:
+            r = client.get(url)
+            if r.status_code == 200:
+                print(f' {Fore.YELLOW}[{Fore.RED}*{Fore.YELLOW}]{Fore.GREEN} Panel found ~> {Fore.RESET}{url}')
+                res.append(url)
+            else:
+                print(f' {Fore.YELLOW}[{Fore.RED}!{Fore.YELLOW}]{Fore.RED} Panel not found ~> {url}')
+    except Exception:
         print(f' {Fore.YELLOW}[{Fore.RED}!{Fore.YELLOW}]{Fore.RED} Panel not found ~> {url}')
 
 def worker(q, url):
@@ -304,6 +308,6 @@ def main():
 
 if __name__ == '__main__':
        try:
-              main()
+            main()
        except KeyboardInterrupt:
-              print(f'\n {Fore.YELLOW}[{Fore.CYAN}>{Fore.YELLOW}] {Fore.RESET}Bye <3')
+            print(f'\n {Fore.YELLOW}[{Fore.CYAN}>{Fore.YELLOW}] {Fore.RESET}Bye <3')
